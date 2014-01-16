@@ -28,13 +28,13 @@
     <packaging>pom</packaging>
     <version>0.4-SNAPSHOT</version>
     <name>Apache Gora</name>
-    <description>The Apache Gora open source framework provides an in-memory data model and 
-    persistence for big data. Gora supports persisting to column stores, key value stores, 
-    document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce 
+    <description>The Apache Gora open source framework provides an in-memory data model and
+    persistence for big data. Gora supports persisting to column stores, key value stores,
+    document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce
     support. </description>
     <url>http://gora.apache.org</url>
     <inceptionYear>2010</inceptionYear>
-    
+
     <licenses>
       <license>
         <name>The Apache Software License, Version 2.0</name>
@@ -46,7 +46,7 @@
       <name>The Apache Software Foundation</name>
       <url>http://www.apache.org/</url>
     </organization>
-    
+
   <developers>
     <developer>
       <id>ab</id>
@@ -230,7 +230,7 @@
       <archive>http://mail-archives.apache.org/mod_mbox/gora-commits</archive>
     </mailingList>
   </mailingLists>
-       
+
   <scm>
     <connection>scm:svn:http://svn.apache.org/repos/asf/gora/trunk/</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/gora/trunk/</developerConnection>
@@ -244,7 +244,7 @@
     <system>Jenkins</system>
     <url>https://builds.apache.org/job/Gora-trunk/</url>
   </ciManagement>
-  
+
   <distributionManagement>
     <repository>
       <id>apache.releases.https</id>
@@ -257,7 +257,7 @@
       <url>https://repository.apache.org/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
-  
+
   <repositories>
     <repository>
       <id>apache.snapshots</id>
@@ -271,7 +271,7 @@
       </releases>
     </repository>
   </repositories>
-  
+
     <build>
     	<defaultGoal>install</defaultGoal>
     	<directory>target</directory>
@@ -447,13 +447,13 @@
             </plugin>
          </plugins>
     </build>
-    
+
     <profiles>
       <profile>
         <id>release</id>
           <build>
             <plugins>
-              <!-- 
+              <!--
               <plugin>
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
@@ -641,7 +641,7 @@
         <maven-deploy-plugin.version>2.5</maven-deploy-plugin.version>
         <checksum-maven-plugin.version>1.0.1</checksum-maven-plugin.version>
         <maven-clean-plugin.version>2.5</maven-clean-plugin.version>
-        
+
         <!-- General Properties -->
         <implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
         <javac.src.version>1.6</javac.src.version>
@@ -666,7 +666,7 @@
             <version>${project.version}</version>
             <type>test-jar</type>
           </dependency>
-          
+
           <!--dependency>
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-solr</artifactId>
@@ -690,7 +690,7 @@
             <version>${project.version}</version>
             <type>test-jar</type>
           </dependency>
-          
+
           <dependency>
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-sql</artifactId>
@@ -720,7 +720,7 @@
             <artifactId>gora-tutorial</artifactId>
             <version>${project.version}</version>
           </dependency>
-          
+
           <dependency>
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-dynamodb</artifactId>
@@ -732,7 +732,7 @@
             <version>${project.version}</version>
             <type>test-jar</type>
           </dependency>
-  
+
           <!-- Avro needs this version of jackson -->
           <dependency>
             <groupId>org.codehaus.jackson</groupId>
@@ -778,7 +778,7 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-rt-frontend-jaxrs</artifactId>
@@ -822,7 +822,7 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.apache.cassandra</groupId>
                 <artifactId>cassandra-thrift</artifactId>
@@ -1132,14 +1132,14 @@
               <artifactId>randomizedtesting-runner</artifactId>
               <version>2.0.10</version>
             </dependency-->
-              
+
             <!-- Amazon Dependencies -->
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk</artifactId>
                 <version>${amazon.version}</version>
             </dependency>
-          
+
             <!-- Misc Dependencies -->
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -1246,13 +1246,13 @@
                 <artifactId>hadoop-test</artifactId>
                 <version>${hadoop.test.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
             </dependency>
-            
+
         </dependencies>
     </dependencyManagement>
 

@@ -16,7 +16,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
     -->
-    
+
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -30,9 +30,9 @@
 
 	<name>Apache Gora :: Accumulo</name>
         <url>http://gora.apache.org</url>
-    <description>The Apache Gora open source framework provides an in-memory data model and 
-    persistence for big data. Gora supports persisting to column stores, key value stores, 
-    document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce 
+    <description>The Apache Gora open source framework provides an in-memory data model and
+    persistence for big data. Gora supports persisting to column stores, key value stores,
+    document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce
     support.</description>
     <inceptionYear>2010</inceptionYear>
     <organization>
@@ -52,12 +52,12 @@
     	<system>Jenkins</system>
     	<url>https://builds.apache.org/job/Gora-trunk/</url>
     </ciManagement>
-	
+
     <properties>
         <osgi.import>*</osgi.import>
         <osgi.export>org.apache.gora.accumulo*;version="${project.version}";-noimport:=true</osgi.export>
     </properties>
-    
+
     <build>
         <directory>target</directory>
         <outputDirectory>target/classes</outputDirectory>
