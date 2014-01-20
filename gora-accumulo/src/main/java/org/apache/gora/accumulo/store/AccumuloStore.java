@@ -62,6 +62,7 @@ import org.apache.accumulo.core.iterators.SortedKeyIterator;
 import org.apache.accumulo.core.iterators.user.TimestampFilter;
 import org.apache.accumulo.core.master.state.tables.TableState;
 import org.apache.accumulo.core.security.ColumnVisibility;
+import org.apache.accumulo.core.security.CredentialHelper;
 import org.apache.accumulo.core.security.thrift.TCredentials;
 import org.apache.accumulo.core.util.Pair;
 import org.apache.accumulo.core.util.TextUtil;
@@ -266,11 +267,11 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
           String instance = DataStoreFactory.findProperty(properties, this, INSTANCE_NAME_PROPERTY, null);
           String zookeepers = DataStoreFactory.findProperty(properties, this, ZOOKEEPERS_NAME_PROPERTY, null);
           PasswordToken passwordToken = new PasswordToken(password);
-          conn = new ZooKeeperInstance(instance, zookeepers).getConnector(user, passwordToken);
-          credentials = new TCredentials(
+          conn = new ZooKeeperInstance(instance, zookeepers)
+              .getConnector(user, passwordToken);
+          credentials = CredentialHelper.create(
               user,
-              PasswordToken.class.getName(),
-              ByteBuffer.wrap(password.getBytes()),
+              passwordToken,
               conn.getInstance().getInstanceID());
         } else {
           conn = new MockInstance().getConnector(user, password);
