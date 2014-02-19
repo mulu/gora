@@ -20,12 +20,12 @@ package org.apache.gora.mapreduce;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.FileSplitPartitionQuery;
+import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.FileBackedDataStore;
@@ -48,9 +48,9 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
  * <p> The {@link InputSplit}s are prepared from the {@link PartitionQuery}s
  * obtained by calling {@link DataStore#getPartitions(Query)}.
  * <p>
- * Hadoop jobs can be either configured through static 
+ * Hadoop jobs can be either configured through static
  * <code>setInput()</code> methods, or from {@link GoraMapper}.
- * 
+ *
  * @see GoraMapper
  */
 public class GoraInputFormat<K, T extends PersistentBase>
@@ -90,14 +90,9 @@ public class GoraInputFormat<K, T extends PersistentBase>
   @Override
   public List<InputSplit> getSplits(JobContext context) throws IOException,
       InterruptedException {
-
-    List<PartitionQuery<K, T>> queries = dataStore.getPartitions(query);
-    List<InputSplit> splits = new ArrayList<InputSplit>(queries.size());
-
-    for(PartitionQuery<K,T> query : queries) {
-      splits.add(new GoraInputSplit(context.getConfiguration(), query));
-    }
-
+    PartitionQuery<K, T> partitionQuery = new PartitionQueryImpl<K, T>(query);
+    List<InputSplit> splits = new ArrayList<InputSplit>();
+    splits.add(new GoraInputSplit(context.getConfiguration(), partitionQuery));
     return splits;
   }
 
@@ -157,7 +152,7 @@ public class GoraInputFormat<K, T extends PersistentBase>
     job.setInputFormatClass(GoraInputFormat.class);
     GoraInputFormat.setQuery(job, query);
   }
-  
+
   /**
    * Sets the input parameters for the job
    * @param job the job to set the properties for
@@ -168,9 +163,9 @@ public class GoraInputFormat<K, T extends PersistentBase>
    * @throws IOException
    */
   public static <K1, V1 extends Persistent> void setInput(
-      Job job, 
-      Class<? extends DataStore<K1,V1>> dataStoreClass, 
-      Class<K1> inKeyClass, 
+      Job job,
+      Class<? extends DataStore<K1,V1>> dataStoreClass,
+      Class<K1> inKeyClass,
       Class<V1> inValueClass,
       boolean reuseObjects)
   throws IOException {
