@@ -43,12 +43,12 @@ public class GoraMapReduceUtils {
       return null;
     }
   }
-  
+
   /**
-   * Add our own serializer (obtained via the {@link PersistentSerialization} 
-   * wrapper) to any other <code>io.serializations</code> which may be specified 
+   * Add our own serializer (obtained via the {@link PersistentSerialization}
+   * wrapper) to any other <code>io.serializations</code> which may be specified
    * within existing Hadoop configuration.
-   * 
+   *
    * @param conf the Hadoop configuration object
    * @param reuseObjects boolean parameter to reuse objects
    */
@@ -56,30 +56,30 @@ public class GoraMapReduceUtils {
     String serializationClass =
       PersistentSerialization.class.getCanonicalName();
     String[] serializations = StringUtils.joinStringArrays(
-        conf.getStrings("io.serializations"), 
+        conf.getStrings("io.serializations"),
         "org.apache.hadoop.io.serializer.WritableSerialization",
         StringSerialization.class.getCanonicalName(),
-        serializationClass); 
+        serializationClass);
     conf.setStrings("io.serializations", serializations);
-  }  
-  
-  public static List<InputSplit> getSplits(Configuration conf, String inputPath) 
+  }
+
+  public static List<InputSplit> getSplits(Configuration conf, String inputPath)
     throws IOException {
     JobContext context = createJobContext(conf, inputPath);
-    
+
     HelperInputFormat<?,?> inputFormat = new HelperInputFormat<Object,Object>();
     return inputFormat.getSplits(context);
   }
-  
-  public static JobContext createJobContext(Configuration conf, String inputPath) 
+
+  public static JobContext createJobContext(Configuration conf, String inputPath)
     throws IOException {
-    
+
     if(inputPath != null) {
       Job job = new Job(conf);
       FileInputFormat.addInputPath(job, new Path(inputPath));
       return new JobContext(job.getConfiguration(), null);
-    } 
-    
+    }
+
     return new JobContext(conf, null);
   }
 }
