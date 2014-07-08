@@ -884,6 +884,20 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
 
   @Override
   public List<PartitionQuery<K,T>> getPartitions(Query<K,T> query) throws IOException {
+    // Do not split if the key class is String, otherwise we would attempt the
+    // nonsensical operation of calculating the following key of a String.
+    return getKeyClass().equals(String.class) ? partitionSingle(query) : partitionBySplit(query);
+  }
+
+  private List<PartitionQuery<K,T>> partitionSingle(Query<K,T> query) {
+    List<PartitionQuery<K,T>> partitions = new ArrayList<PartitionQuery<K,T>>();
+    PartitionQueryImpl<K,T> pqi = new PartitionQueryImpl<K,T>(query);
+    pqi.setConf(getConf());
+    partitions.add(pqi);
+    return partitions;
+  }
+
+  private List<PartitionQuery<K,T>> partitionBySplit(Query<K,T> query) throws IOException {
     try {
       TabletLocator tl;
       if (conn instanceof MockConnector)
