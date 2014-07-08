@@ -455,12 +455,13 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   @Override
   public void createSchema() {
     try {
-      conn.tableOperations().create(mapping.tableName);
-      Set<Entry<String,String>> es = mapping.tableConfig.entrySet();
-      for (Entry<String,String> entry : es) {
-        conn.tableOperations().setProperty(mapping.tableName, entry.getKey(), entry.getValue());
+      if (conn.tableOperations().exists(mapping.tableName) == false) {
+        conn.tableOperations().create(mapping.tableName);
+        Set<Entry<String, String>> es = mapping.tableConfig.entrySet();
+        for (Entry<String, String> entry : es) {
+          conn.tableOperations().setProperty(mapping.tableName, entry.getKey(), entry.getValue());
+        }
       }
-
     } catch (AccumuloException e) {
       LOG.error(e.getMessage(), e);
     } catch (AccumuloSecurityException e) {
