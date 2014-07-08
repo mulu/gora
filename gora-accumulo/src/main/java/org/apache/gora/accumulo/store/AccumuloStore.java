@@ -54,6 +54,8 @@ import org.apache.accumulo.core.client.impl.TabletLocator;
 import org.apache.accumulo.core.client.mock.MockConnector;
 import org.apache.accumulo.core.client.mock.MockInstance;
 import org.apache.accumulo.core.client.mock.MockTabletLocator;
+import org.apache.accumulo.core.client.security.tokens.AuthenticationToken;
+import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.data.ByteSequence;
 import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.KeyExtent;
@@ -64,7 +66,9 @@ import org.apache.accumulo.core.iterators.SortedKeyIterator;
 import org.apache.accumulo.core.iterators.user.TimestampFilter;
 import org.apache.accumulo.core.master.state.tables.TableState;
 import org.apache.accumulo.core.security.ColumnVisibility;
+import org.apache.accumulo.core.security.CredentialHelper;
 import org.apache.accumulo.core.security.thrift.AuthInfo;
+import org.apache.accumulo.core.security.thrift.TCredentials;
 import org.apache.accumulo.core.util.Pair;
 import org.apache.accumulo.core.util.TextUtil;
 import org.apache.accumulo.core.util.UtilWaitThread;
@@ -116,7 +120,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   private Connector conn;
   private BatchWriter batchWriter;
   private AccumuloMapping mapping;
-  private AuthInfo authInfo;
+  private TCredentials credentials;
   private Encoder encoder;
 
   public static final Logger LOG = LoggerFactory.getLogger(AccumuloStore.class);
@@ -264,14 +268,15 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       }
 
       try {
+        AuthenticationToken token = new PasswordToken(password);
         if (mock == null || !mock.equals("true")) {
           String instance = DataStoreFactory.findProperty(properties, this, INSTANCE_NAME_PROPERTY, null);
           String zookeepers = DataStoreFactory.findProperty(properties, this, ZOOKEEPERS_NAME_PROPERTY, null);
-          conn = new ZooKeeperInstance(instance, zookeepers).getConnector(user, password);
-          authInfo = new AuthInfo(user, ByteBuffer.wrap(password.getBytes()), conn.getInstance().getInstanceID());
+          conn = new ZooKeeperInstance(instance, zookeepers).getConnector(user, token);
         } else {
-          conn = new MockInstance().getConnector(user, password);
+          conn = new MockInstance().getConnector(user, token);
         }
+        credentials = CredentialHelper.create(user, token, conn.getInstance().getInstanceID());
 
         if (autoCreateSchema)
           createSchema();
@@ -721,12 +726,12 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       if (conn instanceof MockConnector)
         tl = new MockTabletLocator();
       else
-        tl = TabletLocator.getInstance(conn.getInstance(), authInfo, new Text(Tables.getTableId(conn.getInstance(), mapping.tableName)));
+        tl = TabletLocator.getInstance(conn.getInstance(), new Text(Tables.getTableId(conn.getInstance(), mapping.tableName)));
 
       Map<String,Map<KeyExtent,List<Range>>> binnedRanges = new HashMap<String,Map<KeyExtent,List<Range>>>();
 
       tl.invalidateCache();
-      while (tl.binRanges(Collections.singletonList(createRange(query)), binnedRanges).size() > 0) {
+      while (tl.binRanges(Collections.singletonList(createRange(query)), binnedRanges, credentials).size() > 0) {
         // TODO log?
         if (!Tables.exists(conn.getInstance(), Tables.getTableId(conn.getInstance(), mapping.tableName)))
           throw new TableDeletedException(Tables.getTableId(conn.getInstance(), mapping.tableName));
