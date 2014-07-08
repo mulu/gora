@@ -102,10 +102,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 /**
- * 
+ *
  */
 public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T> {
-  
+
   protected static final String MOCK_PROPERTY = "accumulo.mock";
   protected static final String INSTANCE_NAME_PROPERTY = "accumulo.instance";
   protected static final String ZOOKEEPERS_NAME_PROPERTY = "accumulo.zookeepers";
@@ -118,9 +118,9 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   private AccumuloMapping mapping;
   private AuthInfo authInfo;
   private Encoder encoder;
-  
+
   public static final Logger LOG = LoggerFactory.getLogger(AccumuloStore.class);
-  
+
   public Object fromBytes(Schema schema, byte data[]) {
     return fromBytes(encoder, schema, data);
   }
@@ -145,7 +145,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         return AvroUtils.getEnumValue(schema, encoder.decodeInt(data));
     }
     throw new IllegalArgumentException("Unknown type " + schema.getType());
-    
+
   }
 
   public K fromBytes(Class<K> clazz, byte[] val) {
@@ -174,7 +174,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       } else if (clazz.equals(Utf8.class)) {
         return (K) new Utf8(val);
       }
-      
+
       throw new IllegalArgumentException("Unknown type " + clazz.getName());
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);
@@ -193,9 +193,9 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   public byte[] toBytes(Object o) {
     return toBytes(encoder, o);
   }
-  
+
   public static byte[] toBytes(Encoder encoder, Object o) {
-    
+
     try {
       if (o instanceof String) {
         return ((String) o).getBytes("UTF-8");
@@ -223,7 +223,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);
     }
-    
+
     throw new IllegalArgumentException("Uknown type " + o.getClass().getName());
   }
 
@@ -241,14 +241,14 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
     try{
       super.initialize(keyClass, persistentClass, properties);
-  
+
       String mock = DataStoreFactory.findProperty(properties, this, MOCK_PROPERTY, null);
       String mappingFile = DataStoreFactory.getMappingFile(properties, this, DEFAULT_MAPPING_FILE);
       String user = DataStoreFactory.findProperty(properties, this, USERNAME_PROPERTY, null);
       String password = DataStoreFactory.findProperty(properties, this, PASSWORD_PROPERTY, null);
-      
+
       mapping = readMapping(mappingFile);
-  
+
       if (mapping.encoder == null || mapping.encoder.equals("")) {
         encoder = new org.apache.gora.accumulo.encoders.BinaryEncoder();
       } else {
@@ -262,7 +262,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
           throw new IOException(e);
         }
       }
-  
+
       try {
         if (mock == null || !mock.equals("true")) {
           String instance = DataStoreFactory.findProperty(properties, this, INSTANCE_NAME_PROPERTY, null);
@@ -272,7 +272,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         } else {
           conn = new MockInstance().getConnector(user, password);
         }
-  
+
         if (autoCreateSchema)
           createSchema();
       } catch (AccumuloException e) {
@@ -280,31 +280,31 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       } catch (AccumuloSecurityException e) {
         throw new IOException(e);
       }
-    }catch(IOException e){
+    } catch (IOException e) {
       LOG.error(e.getMessage(), e);
     }
   }
-  
+
   protected AccumuloMapping readMapping(String filename) throws IOException {
     try {
-      
+
       AccumuloMapping mapping = new AccumuloMapping();
 
       DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
       Document dom = db.parse(getClass().getClassLoader().getResourceAsStream(filename));
-      
+
       Element root = dom.getDocumentElement();
-      
+
       NodeList nl = root.getElementsByTagName("class");
       for (int i = 0; i < nl.getLength(); i++) {
-        
+
         Element classElement = (Element) nl.item(i);
         if (classElement.getAttribute("keyClass").equals(keyClass.getCanonicalName())
             && classElement.getAttribute("name").equals(persistentClass.getCanonicalName())) {
 
           mapping.tableName = getSchemaName(classElement.getAttribute("table"), persistentClass);
           mapping.encoder = classElement.getAttribute("encoder");
-          
+
           NodeList fields = classElement.getElementsByTagName("field");
           for (int j = 0; j < fields.getLength(); j++) {
             Element fieldElement = (Element) fields.item(j);
@@ -326,7 +326,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       if (mapping.tableName == null) {
         throw new GoraException("Please define the gora to accumulo mapping in " + filename + " for " + persistentClass.getCanonicalName());
       }
-      
+
       nl = root.getElementsByTagName("table");
       for (int i = 0; i < nl.getLength(); i++) {
         Element tableElement = (Element) nl.item(i);
@@ -347,12 +347,12 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     }
 
   }
-  
+
   @Override
   public String getSchemaName() {
     return mapping.tableName;
   }
-  
+
   @Override
   public void createSchema() {
     try {
@@ -384,7 +384,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       LOG.error(e.getMessage(), e);
     } catch (TableNotFoundException e) {
       LOG.error(e.getMessage(), e);
-    } 
+    }
   }
 
   @Override
@@ -394,7 +394,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
 
   public ByteSequence populate(Iterator<Entry<Key,Value>> iter, T persistent) throws IOException {
     ByteSequence row = null;
-    
+
     Map currentMap = null;
     ArrayList currentArray = null;
     Text currentFam = null;
@@ -404,7 +404,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
 
     while (iter.hasNext()) {
       Entry<Key,Value> entry = iter.next();
-      
+
       if (currentMap != null) {
         if (currentFam.equals(entry.getKey().getColumnFamily())) {
           currentMap.put(new Utf8(entry.getKey().getColumnQualifierData().toArray()), fromBytes(currentSchema, entry.getValue().get()));
@@ -425,7 +425,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
 
       if (row == null)
         row = entry.getKey().getRowData();
-      
+
       String fieldName = mapping.columnMap.get(new Pair<Text,Text>(entry.getKey().getColumnFamily(), entry.getKey().getColumnQualifier()));
       if (fieldName == null)
         fieldName = mapping.columnMap.get(new Pair<Text,Text>(entry.getKey().getColumnFamily(), null));
@@ -438,7 +438,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
           currentPos = field.pos();
           currentFam = entry.getKey().getColumnFamily();
           currentSchema = field.schema().getValueType();
-          
+
           currentMap.put(new Utf8(entry.getKey().getColumnQualifierData().toArray()), fromBytes(currentSchema, entry.getValue().get()));
 
           break;
@@ -448,7 +448,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
           currentFam = entry.getKey().getColumnFamily();
           currentSchema = field.schema().getElementType();
           currentField = field;
-          
+
           currentArray.add(fromBytes(currentSchema, entry.getValue().get()));
 
           break;
@@ -464,7 +464,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
           persistent.put(field.pos(), fromBytes(field.schema(), entry.getValue().get()));
       }
     }
-    
+
     if (currentMap != null) {
       persistent.put(currentPos, currentMap);
     } else if (currentArray != null) {
@@ -494,10 +494,10 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       // TODO make isolated scanner optional?
       Scanner scanner = new IsolatedScanner(conn.createScanner(mapping.tableName, Constants.NO_AUTHS));
       Range rowRange = new Range(new Text(toBytes(key)));
-      
+
       scanner.setRange(rowRange);
       setFetchColumns(scanner, fields);
-      
+
       T persistent = newPersistent();
       ByteSequence row = populate(scanner.iterator(), persistent);
       if (row == null)
@@ -511,25 +511,25 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       return null;
     }
   }
-  
+
   @Override
   public void put(K key, T val) {
 
     try{
       Mutation m = new Mutation(new Text(toBytes(key)));
-      
+
       Schema schema = val.getSchema();
       StateManager stateManager = val.getStateManager();
-      
+
       Iterator<Field> iter = schema.getFields().iterator();
-      
+
       int count = 0;
       for (int i = 0; iter.hasNext(); i++) {
         Field field = iter.next();
         if (!stateManager.isDirty(val, i)) {
           continue;
         }
-        
+
         Object o = val.get(i);
         Pair<Text,Text> col = mapping.fieldMap.get(field.name());
 
@@ -537,7 +537,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
           throw new GoraException("Please define the gora to accumulo mapping for field " + field.name());
         }
 
-  
+
         switch (field.schema().getType()) {
           case MAP:
             if (o instanceof StatefulMap) {
@@ -546,7 +546,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
               for (Object entry : es) {
                 Object mapKey = ((Entry) entry).getKey();
                 State state = (State) ((Entry) entry).getValue();
-  
+
                 switch (state) {
                   case NEW:
                   case DIRTY:
@@ -558,7 +558,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
                     count++;
                     break;
                 }
-                
+
               }
             } else {
               Map map = (Map) o;
@@ -592,9 +592,9 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
             m.put(col.getFirst(), col.getSecond(), new Value(toBytes(o)));
             count++;
         }
-  
+
       }
-      
+
       if (count > 0)
         try {
           getBatchWriter().addMutation(m);
@@ -605,7 +605,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       LOG.error(e.getMessage(), e);
     }
   }
-  
+
   @Override
   public boolean delete(K key) {
     Query<K,T> q = newQuery();
@@ -620,7 +620,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       // add iterator that drops values on the server side
       scanner.addScanIterator(new IteratorSetting(Integer.MAX_VALUE, SortedKeyIterator.class));
       RowIterator iterator = new RowIterator(scanner.iterator());
-      
+
       long count = 0;
 
       while (iterator.hasNext()) {
@@ -637,7 +637,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         getBatchWriter().addMutation(m);
         count++;
       }
-      
+
       return count;
     } catch (TableNotFoundException e) {
       // TODO return 0?
@@ -655,34 +655,34 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   private Range createRange(Query<K,T> query) {
     Text startRow = null;
     Text endRow = null;
-    
+
     if (query.getStartKey() != null)
       startRow = new Text(toBytes(query.getStartKey()));
-    
+
     if (query.getEndKey() != null)
       endRow = new Text(toBytes(query.getEndKey()));
-    
+
     return new Range(startRow, true, endRow, true);
-    
+
   }
-  
+
   private Scanner createScanner(Query<K,T> query) throws TableNotFoundException {
     // TODO make isolated scanner optional?
     Scanner scanner = new IsolatedScanner(conn.createScanner(mapping.tableName, Constants.NO_AUTHS));
     setFetchColumns(scanner, query.getFields());
-    
+
     scanner.setRange(createRange(query));
-    
+
     if (query.getStartTime() != -1 || query.getEndTime() != -1) {
       IteratorSetting is = new IteratorSetting(30, TimestampFilter.class);
       if (query.getStartTime() != -1)
         TimestampFilter.setStart(is, query.getStartTime(), true);
       if (query.getEndTime() != -1)
         TimestampFilter.setEnd(is, query.getEndTime(), true);
-      
+
       scanner.addScanIterator(is);
     }
-    
+
     return scanner;
   }
 
@@ -695,9 +695,9 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       // TODO return empty result?
       LOG.error(e.getMessage(), e);
       return null;
-    } 
+    }
   }
-  
+
   @Override
   public Query<K,T> newQuery() {
     return new AccumuloQuery<K,T>(this);
@@ -706,14 +706,14 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   Text pad(Text key, int bytes) {
     if (key.getLength() < bytes)
       key = new Text(key);
-    
+
     while (key.getLength() < bytes) {
       key.append(new byte[] {0}, 0, 1);
     }
-    
+
     return key;
   }
-  
+
   @Override
   public List<PartitionQuery<K,T>> getPartitions(Query<K,T> query) throws IOException {
     try {
@@ -722,9 +722,9 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         tl = new MockTabletLocator();
       else
         tl = TabletLocator.getInstance(conn.getInstance(), authInfo, new Text(Tables.getTableId(conn.getInstance(), mapping.tableName)));
-      
+
       Map<String,Map<KeyExtent,List<Range>>> binnedRanges = new HashMap<String,Map<KeyExtent,List<Range>>>();
-      
+
       tl.invalidateCache();
       while (tl.binRanges(Collections.singletonList(createRange(query)), binnedRanges).size() > 0) {
         // TODO log?
@@ -735,19 +735,19 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         UtilWaitThread.sleep(100);
         tl.invalidateCache();
       }
-      
+
       List<PartitionQuery<K,T>> ret = new ArrayList<PartitionQuery<K,T>>();
-      
+
       Text startRow = null;
       Text endRow = null;
       if (query.getStartKey() != null)
         startRow = new Text(toBytes(query.getStartKey()));
       if (query.getEndKey() != null)
         endRow = new Text(toBytes(query.getEndKey()));
-     
+
       //hadoop expects hostnames, accumulo keeps track of IPs... so need to convert
       HashMap<String,String> hostNameCache = new HashMap<String,String>();
- 
+
       for (Entry<String,Map<KeyExtent,List<Range>>> entry : binnedRanges.entrySet()) {
         String ip = entry.getKey().split(":", 2)[0];
         String location = hostNameCache.get(ip);
@@ -759,7 +759,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
 
         Map<KeyExtent,List<Range>> tablets = entry.getValue();
         for (KeyExtent ke : tablets.keySet()) {
-          
+
           K startKey = null;
           if (startRow == null || !ke.contains(startRow)) {
             if (ke.getPrevEndRow() != null) {
@@ -768,7 +768,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
           } else {
             startKey = fromBytes(getKeyClass(), TextUtil.getBytes(startRow));
           }
-          
+
           K endKey = null;
           if (endRow == null || !ke.contains(endRow)) {
             if (ke.getEndRow() != null)
@@ -776,13 +776,13 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
           } else {
             endKey = fromBytes(getKeyClass(), TextUtil.getBytes(endRow));
           }
-          
+
           PartitionQueryImpl pqi = new PartitionQueryImpl<K,T>(query, startKey, endKey, new String[] {location});
           pqi.setConf(getConf());
           ret.add(pqi);
         }
       }
-      
+
       return ret;
     } catch (TableNotFoundException e) {
       throw new IOException(e);
@@ -791,11 +791,11 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     } catch (AccumuloSecurityException e) {
       throw new IOException(e);
     }
-    
+
   }
-  
+
   static <K> K lastPossibleKey(Encoder encoder, Class<K> clazz, byte[] er) {
-    
+
     if (clazz.equals(Byte.TYPE) || clazz.equals(Byte.class)) {
       throw new UnsupportedOperationException();
     } else if (clazz.equals(Boolean.TYPE) || clazz.equals(Boolean.class)) {
@@ -815,19 +815,19 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     } else if (clazz.equals(Utf8.class)) {
       return fromBytes(encoder, clazz, er);
     }
-    
+
     throw new IllegalArgumentException("Unknown type " + clazz.getName());
   }
 
 
-  
+
   /**
    * @param keyClass
    * @param bytes
    * @return
    */
   static <K> K followingKey(Encoder encoder, Class<K> clazz, byte[] per) {
-    
+
     if (clazz.equals(Byte.TYPE) || clazz.equals(Byte.class)) {
       return (K) Byte.valueOf(encoder.followingKey(1, per)[0]);
     } else if (clazz.equals(Boolean.TYPE) || clazz.equals(Boolean.class)) {
@@ -859,7 +859,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       }
     } catch (MutationsRejectedException e) {
       LOG.error(e.getMessage(), e);
-    } 
+    }
   }
 
   @Override
@@ -871,6 +871,6 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       }
     } catch (MutationsRejectedException e) {
       LOG.error(e.getMessage(), e);
-    } 
+    }
   }
 }
