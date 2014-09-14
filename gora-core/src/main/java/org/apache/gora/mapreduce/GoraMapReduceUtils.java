@@ -30,6 +30,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.task.JobContextImpl;
 
 /**
  * MapReduce related utilities for Gora
@@ -77,9 +78,9 @@ public class GoraMapReduceUtils {
     if(inputPath != null) {
       Job job = new Job(conf);
       FileInputFormat.addInputPath(job, new Path(inputPath));
-      return new JobContext(job.getConfiguration(), null);
+      return new JobContextImpl(job.getConfiguration(), null);
     }
 
-    return new JobContext(conf, null);
+    return new JobContextImpl(conf, null);
   }
 }

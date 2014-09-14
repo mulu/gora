@@ -600,7 +600,7 @@
     <!-- Avro Dependencies -->
     <jackson.version>1.6.9</jackson.version>
     <!-- Hadoop Dependencies -->
-    <hadoop.version>1.0.1</hadoop.version>
+    <hadoop.version>2.3.0</hadoop.version>
     <hadoop.test.version>1.0.1</hadoop.test.version>
     <hbase.version>0.94.14</hbase.version>
     <avro.version>1.7.4</avro.version>
@@ -784,7 +784,7 @@
       <!-- Hadoop Dependencies -->
       <dependency>
         <groupId>org.apache.hadoop</groupId>
-        <artifactId>hadoop-core</artifactId>
+        <artifactId>hadoop-client</artifactId>
         <version>${hadoop.version}</version>
         <exclusions>
           <!--  jackson is conflicting with the Avro dep -->
@@ -1317,12 +1317,14 @@
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-test</artifactId>
         <version>${hadoop.test.version}</version>
+        <scope>test</scope>
       </dependency>
 
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>${junit.version}</version>
+        <scope>test</scope>
       </dependency>
 
     </dependencies>
